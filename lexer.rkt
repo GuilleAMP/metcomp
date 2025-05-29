@@ -57,5 +57,9 @@
    ["!" (token-NOT)]
    ["||" (token-OR)]
    ["&&" (token-AND)]
+   ["." (token-DOT)]
+   ["h" (token-H)]
+   ["hpp" (token-HPP)]
+   ["hh" (token-HH)]
    [number (token-NUMBER (string->number lexeme))]
    ))

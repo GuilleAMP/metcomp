@@ -38,4 +38,8 @@
                                 HASH
                                 INCLUDE
                                 QUOTE
+                                DOT
+                                H
+                                HH
+                                HPP
                                 EOF))

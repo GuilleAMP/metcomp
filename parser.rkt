@@ -38,11 +38,10 @@
     (header-filename
      [(IDENTIFIER DOT header-extension) (string-append $1 "." $3)])
 
-    (header-extension
-     [("h") "h"]
-     [("hpp") "hpp"]
-     [("hh") "hh"])
-
+    [header-extension
+     [(H) 'h]
+     [(HPP) 'hpp]
+     [(HH) 'hh]]
 
     ;; ------------- 7. Using directive ---------------------------
     ;; scope-resolution
