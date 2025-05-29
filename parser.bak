@@ -19,30 +19,6 @@
     ;; Programa = lista de sentencias
     [program [(statements) $1]]
 
-    ;; PARAMETER
-    [parameter
-     [(IDENTIFIER) $1]]
-
-    ;; PARAMETER LIST
-    [parameter-list
-     [(parameter)(list $1)]
-     [(parameter COMMA parameter-list)(cons $1 $3)]]
-
-
-    ;; ------------- 7. Using directive ---------------------------
-    ;; scope-resolution
-    [scope-resolution
-     [ (SCOPE-RESOLUTION) '::] ]
-
-    ;; namespace-name (recursiva)
-    [namespace-name
-     [ (IDENTIFIER) $1 ]
-     [ (IDENTIFIER scope-resolution namespace-name) (list $1 ':: $3)] ]
-
-    ;; using-directive
-    [using-directive
-     [ (USING namespace-name TERMINATOR) (list 'using $2)] ]
-    
     ;; Sentencias múltiples (recursivo)
     [statements
      [() '()] ; caso base

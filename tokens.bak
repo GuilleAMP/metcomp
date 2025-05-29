@@ -12,8 +12,7 @@
                              FLOAT
                              STRING
                              CHAR
-                             BOOLEAN
-                             USING))
+                             BOOLEAN))
 (define-empty-tokens op-tokens (ASSIGN
                                 TERMINATOR
                                 PLUS
@@ -33,5 +32,4 @@
                                 AND
                                 NOT
                                 BREAK
-                                SCOPE-RESOLUTION
                                 EOF))
