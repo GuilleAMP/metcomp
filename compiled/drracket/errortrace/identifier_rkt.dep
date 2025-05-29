@@ -1,0 +1,1 @@
+("8.15" ta6nt ("4be7f04801eacf7d8434ea68a5071479d3aee462" . "ce93f5e94f804aed6ddca499b0c388d37d2550e4") (collects #"drracket" #"private" #"drracket-errortrace-key.rkt") (collects #"parser-tools" #"lex-sre.rkt") (collects #"parser-tools" #"lex.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
