@@ -14,6 +14,7 @@
                              CHAR
                              BOOLEAN
                              USING))
+
 (define-empty-tokens op-tokens (ASSIGN
                                 TERMINATOR
                                 PLUS
@@ -34,4 +35,7 @@
                                 NOT
                                 BREAK
                                 SCOPE-RESOLUTION
+                                HASH
+                                INCLUDE
+                                QUOTE
                                 EOF))

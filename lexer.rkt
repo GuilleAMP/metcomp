@@ -23,6 +23,8 @@
    [whitespace (next-token input-port)]
    [data-type (token-DATA-TYPE lexeme)]
    ["using" (token-USING)]
+   ["include" (token-INCLUDE)]
+   ["#" (token-HASH)]
    ["cin" (token-CIN)]
    ["cout" (token-COUT)]
    ["public" (token-ACCESS-SPECIFIER 'public)]
@@ -32,7 +34,8 @@
    ["false" (token-BOOLEAN #f)]
    ["return" (token-RETURN)]
    ["break" (token-BREAK)]
-   ["::" (token-SCOPE-RESOLUTION)] 
+   ["::" (token-SCOPE-RESOLUTION)]
+   ["\"" (token-QUOTE)]
    ["(" (token-LPAREN)]
    [")" (token-RPAREN)]
    [identifier (token-IDENTIFIER lexeme)]
@@ -54,4 +57,5 @@
    ["!" (token-NOT)]
    ["||" (token-OR)]
    ["&&" (token-AND)]
-   [number (token-NUMBER (string->number lexeme))]))
+   [number (token-NUMBER (string->number lexeme))]
+   ))

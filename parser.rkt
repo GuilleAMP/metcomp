@@ -28,6 +28,21 @@
      [(parameter)(list $1)]
      [(parameter COMMA parameter-list)(cons $1 $3)]]
 
+;; -------------------- 6. Pre-Compiler-Local-Include -----------------
+    (pre-compiler-local-include
+     [(HASH INCLUDE local-header) (list 'include-local $3)])
+
+    (local-header
+     [(QUOTE header-filename QUOTE) $2])
+
+    (header-filename
+     [(IDENTIFIER DOT header-extension) (string-append $1 "." $3)])
+
+    (header-extension
+     [("h") "h"]
+     [("hpp") "hpp"]
+     [("hh") "hh"])
+
 
     ;; ------------- 7. Using directive ---------------------------
     ;; scope-resolution
