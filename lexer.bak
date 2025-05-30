@@ -9,7 +9,8 @@
          "integer.rkt"
          "float.rkt"
          "string-char.rkt"
-         "boolean.rkt")
+         "boolean.rkt"
+         "header.rkt")
 
 (provide next-token)
 
@@ -21,6 +22,9 @@
    [(eof) (token-EOF)]
    [whitespace (next-token input-port)]
    [data-type (token-DATA-TYPE lexeme)]
+   ["using" (token-USING)]
+   ["include" (token-INCLUDE)]
+   ["#" (token-HASH)]
    ["cin" (token-CIN)]
    ["cout" (token-COUT)]
    ["public" (token-ACCESS-SPECIFIER 'public)]
@@ -30,14 +34,20 @@
    ["false" (token-BOOLEAN #f)]
    ["return" (token-RETURN)]
    ["break" (token-BREAK)]
+   ["default" (token-DEFAULT)]
+   ["else" (token-ELSE)]
+   ["if" (token-IF)]
    ["(" (token-LPAREN)]
    [")" (token-RPAREN)]
+   [#\" (token-QUOTE)]
+   [header (token-HEADER lexeme)]
    [identifier (token-IDENTIFIER lexeme)]
    [literal (token-LITERAL lexeme)]
    [integer (token-INTEGER (string->number lexeme))]
    [float (token-FLOAT (string->number lexeme))]
    [string (token-STRING lexeme)]
    [char (token-CHAR lexeme)]
+   ["::" (token-SCOPE-RESOLUTION)]
    ["<<" (token-SHIFT-L)]
    [">>" (token-SHIFT-R)]
    [#\+ (token-PLUS)]
@@ -51,4 +61,10 @@
    ["!" (token-NOT)]
    ["||" (token-OR)]
    ["&&" (token-AND)]
+   ["{" (token-BRACE-OPEN)]
+   ["}" (token-BRACE-CLOSE)]
+   ["." (token-DOT)]
+   ["h" (token-H)]
+   ["hpp" (token-HPP)]
+   ["hh" (token-HH)]
    [number (token-NUMBER (string->number lexeme))]))

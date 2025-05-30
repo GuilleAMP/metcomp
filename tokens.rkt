@@ -48,4 +48,14 @@
                                 H
                                 HH
                                 HPP
+                                INCREMENTER
+                                DECREMENTER
+                                FOR
+                                MORE
+                                LESS
+                                MORE-EQUAL
+                                LESS-EQUAL
+                                WHILE
+                                TILDE
+                                CLASS
                                 EOF))

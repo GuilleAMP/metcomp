@@ -26,7 +26,10 @@
 
     ;; Sentencias posibles
     [sentencia
-      ;; ------------------------------------  7.USING DIRECTIVE  ----------------------------------------------------
+     ;; ------------------------------------  2. FUNCTION  ----------------------------------------------------
+     [(function)
+      (list $1)]
+      ;; ------------------------------------  6. PRE COMPILER LOCAL INCLUDE  ----------------------------------------------------
      [(pre-compiler-local-include)
       (list $1)]
           ;; ------------------------------------  7.USING DIRECTIVE  ----------------------------------------------------
@@ -46,13 +49,25 @@
      [(variable-assignation)
       (list $1)]
      ;;  --------------------------------- 12. STATEMENT -------------------------------------------------
-    [(statement)
-     (list 'statement $1)]
+     ;;[(statement)
+      ;;(list $1)]
          ;;  --------------------------------- 13. RETURN STATEMENT -------------------------------------------------
      [(return-statement)
       (list $1)]
      ;;  --------------------------------- 14. IF STATEMENT -------------------------------------------------
      [(if-statement)
+      (list $1)]
+      ;;  --------------------------------- 15. LOOP STRUCTURE -------------------------------------------------
+     [(loop-structure)
+      (list $1)]
+      ;;  --------------------------------- 16. CLASS DEFINITION -------------------------------------------------
+     [(class-definition)
+      (list $1)]
+     ;;  --------------------------------- 17. CONSTRUCTOR -------------------------------------------------
+     [(constructor)
+      (list $1)]
+     ;;  --------------------------------- 18. DESTRUCTOR -------------------------------------------------
+     [(destructor)
       (list $1)]]
     ;;
      
@@ -69,7 +84,11 @@
     ;; LOGICAL OPERATOR
     [logical-operator
      [(AND) 'and]
-     [(OR)  'or]]
+     [(OR)  'or]
+     [(MORE) 'more]
+     [(LESS) 'less]
+     [(MORE-EQUAL) 'more-equal]
+     [(LESS-EQUAL) 'less-equal]]
     ;; ARITHMETIC OPERATOR
     [arithmetic-operator
      [(PLUS) '+]
@@ -92,7 +111,9 @@
     ;; FUNCTION CALL
     [function-call
      [(IDENTIFIER LPAREN RPAREN) (list $1)]
-     [(IDENTIFIER LPAREN argument-list RPAREN) (list $1 $3)]]
+     [(IDENTIFIER LPAREN argument-list RPAREN) (list $1 $3)]
+     [(IDENTIFIER LPAREN RPAREN TERMINATOR) (list $1)]
+     [(IDENTIFIER LPAREN argument-list RPAREN TERMINATOR) (list $1 $3)]]
     ;; VARIABLE ASSIGNATION
     [variable-assignation
      [(IDENTIFIER ASSIGN expression TERMINATOR) (list 'variable-assignation $1 $3)]]
@@ -123,10 +144,15 @@
      [(variable-assignation) $1]
      [(function-call) $1]
      [(return-statement) $1]
-     [(if-statement) $1]]
+     [(if-statement) $1]
+     [(input-output) $1]]
     ;; BLOCK
     [block
-     [(BRACE-OPEN statement BRACE-CLOSE) (list 'block $2)]]
+     [(BRACE-OPEN statement-list BRACE-CLOSE)
+      (list 'block $2)]]
+    [statement-list
+     [() '()] ; bloque vacío
+     [(statement statement-list) (cons $1 $2)]]
     ;; ELSE BLOCK
     [else-statement
      [(ELSE COLON block) (list 'else $3)]]
@@ -148,9 +174,65 @@
     [pre-compiler-local-include
      [(HASH INCLUDE HEADER)
       (list 'include-local $3)]]
-    [local-header
-     [(QUOTE header-filename QUOTE) $2]]
-    [header-filename
-     [(IDENTIFIER DOT)
-      (list 'header $1)]]
+    ;; INCREMENT OPRATOR
+    [increment-operator
+     [(INCREMENTER) '++]
+     [(DECREMENTER) '--]]
+    ;; UPDATE EXPRESSION
+    [update-expression
+     [(IDENTIFIER increment-operator) $1]]
+    ;; FOR INTIALIZATION
+    [for-intialization
+     [(variable-declaration) $1]
+     [(variable-assignation) $1]]
+    ;; FOR LOOP
+    [for-loop
+     [(FOR LPAREN for-intialization logical-expression TERMINATOR update-expression RPAREN block) (list 'for-loop $3 $4 $8)]]
+    ;; WHILE LOOP
+    [while-loop
+     [(WHILE LPAREN logical-expression RPAREN block) (list 'while-loop $3 $5)]]
+    ;; LOOP STRUCTURE
+    [loop-structure
+     [(while-loop) $1]
+     [(for-loop) $1]]
+    ;; PARAMETER
+    [parameter
+     [(DATA-TYPE IDENTIFIER) (list 'parameter $2)]]
+    ;; PARAMETER LIST
+    [parameter-list
+     [(parameter) (list $1)]
+     [(parameter COMMA parameter) (cons $1 $3)]]
+    ;; DESTRUCTOR
+    [destructor
+     [(TILDE IDENTIFIER LPAREN RPAREN block) (list 'destructor $2 $5)]
+     [(TILDE IDENTIFIER LPAREN RPAREN) (list 'destructor)]]
+    ;; CONSTRUCTOR
+    [constructor
+     [(IDENTIFIER LPAREN RPAREN block) (list 'constructor $1 $4)]
+     [(IDENTIFIER LPAREN parameter-list RPAREN block) (list 'constructor $1 $3 $5)]]
+    ; FUNCTION
+    [function
+     [(DATA-TYPE IDENTIFIER LPAREN parameter-list RPAREN block) (list 'function $2 $4 $6)]]
+    ;; CLASS MEMBER
+    [class-member
+     [(variable-declaration) $1]
+     [(function) $1]
+     [(constructor) $1]
+     [(destructor) $1]]
+    ;; CLASS MEMBER LIST
+    [class-member-list
+     [() '()]
+     [(class-member class-member-list) (cons $1 $2)]]
+    ;; CLASS BODY
+    [class-body
+     [(access-specifier class-member-list) (list 'class-body $2)]]
+    [class-body-list
+     [() '()]
+     [(class-body class-body-list) (cons $1 $2)]]
+    ;; CLASS BLOCL
+    [class-block
+     [(BRACE-OPEN class-body-list BRACE-CLOSE) (list 'class-block $2)]]
+    ;; CLASS DEFINITION
+    [class-definition
+     [(CLASS IDENTIFIER class-block) (list 'class-definition $2 $3)]]
     ]))
