@@ -12,9 +12,9 @@
                              FLOAT
                              STRING
                              CHAR
+                             HEADER
                              BOOLEAN
-                             USING))
-
+                             ))
 (define-empty-tokens op-tokens (ASSIGN
                                 TERMINATOR
                                 PLUS
@@ -34,10 +34,16 @@
                                 AND
                                 NOT
                                 BREAK
+                                DEFAULT
+                                BRACE-OPEN
+                                BRACE-CLOSE
+                                ELSE
+                                IF
                                 SCOPE-RESOLUTION
                                 HASH
                                 INCLUDE
                                 QUOTE
+                                USING
                                 DOT
                                 H
                                 HH

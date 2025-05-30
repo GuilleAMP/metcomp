@@ -17,53 +17,21 @@
    [grammar
 
     ;; Programa = lista de sentencias
-    [program [(statements) $1]]
+    [program [(sentencias) $1]]
 
-    ;; PARAMETER
-    [parameter
-     [(IDENTIFIER) $1]]
-
-    ;; PARAMETER LIST
-    [parameter-list
-     [(parameter)(list $1)]
-     [(parameter COMMA parameter-list)(cons $1 $3)]]
-
-;; -------------------- 6. Pre-Compiler-Local-Include -----------------
-    (pre-compiler-local-include
-     [(HASH INCLUDE local-header) (list 'include-local $3)])
-
-    (local-header
-     [(QUOTE header-filename QUOTE) $2])
-
-    (header-filename
-     [(IDENTIFIER DOT header-extension) (string-append $1 "." $3)])
-
-    [header-extension
-     [(H) 'h]
-     [(HPP) 'hpp]
-     [(HH) 'hh]]
-
-    ;; ------------- 7. Using directive ---------------------------
-    ;; scope-resolution
-    [scope-resolution
-     [ (SCOPE-RESOLUTION) '::] ]
-
-    ;; namespace-name (recursiva)
-    [namespace-name
-     [ (IDENTIFIER) $1 ]
-     [ (IDENTIFIER scope-resolution namespace-name) (list $1 ':: $3)] ]
-
-    ;; using-directive
-    [using-directive
-     [ (USING namespace-name TERMINATOR) (list 'using $2)] ]
-    
     ;; Sentencias múltiples (recursivo)
-    [statements
+    [sentencias
      [() '()] ; caso base
-     [(statement statements) (cons $1 $2)]]
+     [(sentencia sentencias) (cons $1 $2)]]
 
     ;; Sentencias posibles
-    [statement
+    [sentencia
+      ;; ------------------------------------  7.USING DIRECTIVE  ----------------------------------------------------
+     [(pre-compiler-local-include)
+      (list $1)]
+          ;; ------------------------------------  7.USING DIRECTIVE  ----------------------------------------------------
+     [(using-directive)
+      (list $1)]
      ;; ------------------------------------  8. INPUT OUTPUT  ----------------------------------------------------
      [(input-output)
       (list $1)]
@@ -74,16 +42,21 @@
      ;; Simple
      [(variable-declaration)
       (list $1)]
-
      ;; --------------------------------- 11. VARIABLE ASSIGNATION-------------------------------------------------
      [(variable-assignation)
       (list $1)]
-     ;;  --------------------------------- 12. RETURN STATEMENT -------------------------------------------------
+     ;;  --------------------------------- 12. STATEMENT -------------------------------------------------
+    [(statement)
+     (list 'statement $1)]
+         ;;  --------------------------------- 13. RETURN STATEMENT -------------------------------------------------
      [(return-statement)
+      (list $1)]
+     ;;  --------------------------------- 14. IF STATEMENT -------------------------------------------------
+     [(if-statement)
       (list $1)]]
+    ;;
      
     ;; Expresiones básicas y binarias
-
     ;; EXPRESSION
     [expression
      [(LITERAL) $1]
@@ -120,9 +93,6 @@
     [function-call
      [(IDENTIFIER LPAREN RPAREN) (list $1)]
      [(IDENTIFIER LPAREN argument-list RPAREN) (list $1 $3)]]
-    ;; BREAK STATEMENT
-    [break-statement
-     [(BREAK TERMINATOR) (list 'break)]]
     ;; VARIABLE ASSIGNATION
     [variable-assignation
      [(IDENTIFIER ASSIGN expression TERMINATOR) (list 'variable-assignation $1 $3)]]
@@ -147,4 +117,40 @@
       (list 'return $2)]
      [(RETURN TERMINATOR)
       (list 'return)]]
+    ;; STATEMENT
+    [statement
+     [(variable-declaration) $1]
+     [(variable-assignation) $1]
+     [(function-call) $1]
+     [(return-statement) $1]
+     [(if-statement) $1]]
+    ;; BLOCK
+    [block
+     [(BRACE-OPEN statement BRACE-CLOSE) (list 'block $2)]]
+    ;; ELSE BLOCK
+    [else-statement
+     [(ELSE COLON block) (list 'else $3)]]
+    ;; IF STATEMENT
+    [if-statement
+     [(IF LPAREN logical-expression RPAREN block) (list 'if $3 $5)]
+     [(IF LPAREN logical-expression RPAREN block else-statement) (list 'if-else $3 $5 $6)]]
+    ;; scope-resolution
+    [scope-resolution
+     [ (SCOPE-RESOLUTION) '::] ]
+    ;; namespace-name (recursiva)
+    [namespace-name
+     [ (IDENTIFIER) $1 ]
+     [ (IDENTIFIER scope-resolution namespace-name) (list $1 ':: $3)] ]
+    ;; using-directive
+    [using-directive
+     [ (USING namespace-name TERMINATOR) (list 'using $2)]]
+    ;; PRECOMPILER LOCAL
+    [pre-compiler-local-include
+     [(HASH INCLUDE HEADER)
+      (list 'include-local $3)]]
+    [local-header
+     [(QUOTE header-filename QUOTE) $2]]
+    [header-filename
+     [(IDENTIFIER DOT)
+      (list 'header $1)]]
     ]))

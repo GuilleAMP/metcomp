@@ -10,7 +10,7 @@
          "float.rkt"
          "string-char.rkt"
          "boolean.rkt"
-         "parameter_list.rkt")
+         "header.rkt")
 
 (provide next-token)
 
@@ -34,16 +34,20 @@
    ["false" (token-BOOLEAN #f)]
    ["return" (token-RETURN)]
    ["break" (token-BREAK)]
-   ["::" (token-SCOPE-RESOLUTION)]
-   ["\"" (token-QUOTE)]
+   ["default" (token-DEFAULT)]
+   ["else" (token-ELSE)]
+   ["if" (token-IF)]
    ["(" (token-LPAREN)]
    [")" (token-RPAREN)]
+   [#\" (token-QUOTE)]
+   [header (token-HEADER lexeme)]
    [identifier (token-IDENTIFIER lexeme)]
    [literal (token-LITERAL lexeme)]
    [integer (token-INTEGER (string->number lexeme))]
    [float (token-FLOAT (string->number lexeme))]
    [string (token-STRING lexeme)]
    [char (token-CHAR lexeme)]
+   ["::" (token-SCOPE-RESOLUTION)]
    ["<<" (token-SHIFT-L)]
    [">>" (token-SHIFT-R)]
    [#\+ (token-PLUS)]
@@ -57,9 +61,10 @@
    ["!" (token-NOT)]
    ["||" (token-OR)]
    ["&&" (token-AND)]
+   ["{" (token-BRACE-OPEN)]
+   ["}" (token-BRACE-CLOSE)]
    ["." (token-DOT)]
    ["h" (token-H)]
    ["hpp" (token-HPP)]
    ["hh" (token-HH)]
-   [number (token-NUMBER (string->number lexeme))]
-   ))
+   [number (token-NUMBER (string->number lexeme))]))
