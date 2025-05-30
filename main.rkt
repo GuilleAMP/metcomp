@@ -2,21 +2,14 @@
 (require "lexer.rkt"
          "parser.rkt")
 
-(define (run-parser input-string)
-  (define in (open-input-string input-string))
-  (define (next) (next-token in))
+;; Esta función recibe un input-port y parsea usando `parse` de 1 argumento
+(define (run-parser input-port)
+  (define (next) (next-token input-port))
   (define result (parse next))
-  (close-input-port in)
+  (close-input-port input-port)
   result)
 
-;; Prueba
-(displayln (run-parser "cout << a;
-                        return a + b + c;
-                        cin >> b;
-                        public:
-                        int abuela123;
-                        int num = 28;
-                        num = num + 2;
-                        abc = 2;"))
-(displayln (run-parser "a, b, c"))
-
+;; Ejecuta el parser sobre un archivo real
+(define input (open-input-file "code.cpp"))
+(define result (run-parser input))
+(displayln result)
