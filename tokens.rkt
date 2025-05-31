@@ -30,6 +30,15 @@
                                 LPAREN
                                 RPAREN
                                 RETURN
+                                EQUAL
+                                NOT-EQUAL
+                                PLUS-ASSIGN
+                                MINUS-ASSIGN
+                                MUL-ASSIGN
+                                DIV-ASSIGN
+                                MOD-ASSIGN
+                                CONTINUE
+                                MAIN
                                 OR
                                 AND
                                 NOT
@@ -58,4 +67,25 @@
                                 WHILE
                                 TILDE
                                 CLASS
+                                STRUCT
+                                DEFINE
+                                IOSTREAM
+                                VECTOR
+                                CMATH
+                                CSTDLIB
+                                CSTDIO
+                                CSTRING
+                                CTIME
+                                ALGORITHM
+                                ANGLE-BRACE-OPEN
+                                ANGLE-BRACE-CLOSE
+                                IFDEF
+                                IFNDEF
+                                ELIF
+                                ENDIF
+                                UNDEF
+                                ERROR
+                                WARNING
+                                PRAGMA
+                                LINE
                                 EOF))
