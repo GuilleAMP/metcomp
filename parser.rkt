@@ -74,7 +74,20 @@
       (list $1)]
      ;;  --------------------------------- 18. DESTRUCTOR -------------------------------------------------
      [(destructor)
+      (list $1)]
+     ;;  --------------------------------- 19. GETTER -------------------------------------------------
+     [(getter)
+      (list $1)]
+         ;;  --------------------------------- 19. GETTER -------------------------------------------------
+     [(setter)
+      (list $1)]
+              ;;  --------------------------------- 19. TEMPLATE DECLARATION -------------------------------------------------
+     [(template-declaration)
+      (list $1)]
+     ;;  --------------------------------- 21. CLASS HEADER -------------------------------------------------
+     [(class-header)
       (list $1)]]
+    
     ;;
      
     ;; Expresiones básicas y binarias
@@ -225,7 +238,9 @@
      [(variable-declaration) $1]
      [(function) $1]
      [(constructor) $1]
-     [(destructor) $1]]
+     [(destructor) $1]
+     [(getter) $1]
+     [(setter) $1]]
     ;; CLASS MEMBER LIST
     [class-member-list
      [() '()]
@@ -241,7 +256,7 @@
      [(BRACE-OPEN class-body-list BRACE-CLOSE) (list 'class-block $2)]]
     ;; CLASS DEFINITION
     [class-definition
-     [(CLASS IDENTIFIER class-block) (list 'class-definition $2 $3)]]
+     [(class-header class-block) (list 'class-definition $1 $2)]]
     ;; SYSTEM HEADER
     [system-header-name
      [(IOSTREAM) 'iostream]
@@ -282,4 +297,46 @@
    [struct
     [(STRUCT IDENTIFIER BRACE-OPEN struct-body BRACE-CLOSE TERMINATOR)
      (list 'struct $2 $4)]]
+
+   ;; GETTER
+   [getter
+    [(DATA-TYPE GETTER-NAME LPAREN RPAREN block) (list 'getter $2 $5)]]
+
+   ;; SETTER
+   [setter
+    [(VOID SETTER-NAME LPAREN parameter RPAREN block) (list 'setter $2 $4 $6)]]
+   
+   ;; TEMPLATE PARAMETER
+   [template-parameter
+    [(TYPENAME IDENTIFIER )
+     (list 'template-parameter $2)]
+    [(CLASS IDENTIFIER )
+     (list 'template-parameter $2)]
+    [(DATA-TYPE IDENTIFIER )
+     (list 'template-parameter $2)]
+    [(TYPENAME DATA-TYPE )
+     (list 'template-parameter $2)]
+    [(CLASS DATA-TYPE )
+     (list 'template-parameter $2)]
+    [(DATA-TYPE DATA-TYPE )
+     (list 'template-parameter $2)]]
+
+   ;;TEMPLATE DECLARATION
+   [template-declaration
+    [(TEMPLATE LESS template-parameter MORE)
+     (list 'template-declaration $3)]]
+
+   ;; BASE CLASS LIST
+   [base-class-list
+    [(IDENTIFIER) (list $1)]
+    [(IDENTIFIER COMMA base-class-list) (cons $1 $3)]]
+
+   ;; INHERITANCE
+   [inheritance
+    [(COLON ACCESS-SPECIFIER base-class-list) (list 'inheritance $3)]]
+
+   [class-header
+    [(CLASS IDENTIFIER inheritance) (list 'class-header $2 $3)]
+    [(CLASS IDENTIFIER) (list 'class-header $2)]]
+
     ]))

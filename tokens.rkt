@@ -15,6 +15,9 @@
                              HEADER
                              BOOLEAN
                              TEXT
+                             IDENTIFIER-CAPITALIZED
+                             GETTER-NAME
+                             SETTER-NAME
                              ))
 (define-empty-tokens op-tokens (ASSIGN
                                 TERMINATOR
@@ -81,4 +84,8 @@
                                 PRAGMA
                                 LINE
                                 MAIN
+                                GET
+                                VOID
+                                TEMPLATE
+                                TYPENAME
                                 EOF))

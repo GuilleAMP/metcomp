@@ -11,7 +11,8 @@
          "string-char.rkt"
          "boolean.rkt"
          "header.rkt"
-         "text.rkt")
+         "text.rkt"
+         "identifier-capitalized.rkt")
 
 (provide next-token)
 
@@ -22,6 +23,7 @@
   (lexer
    [(eof) (token-EOF)]
    [whitespace (next-token input-port)]
+   ["void" (token-VOID)]
    [data-type (token-DATA-TYPE lexeme)]
    ["class" (token-CLASS)]
    ["struct" (token-STRUCT)]
@@ -44,6 +46,8 @@
    ["if" (token-IF)]
    ["(" (token-LPAREN)]
    [")" (token-RPAREN)]
+   ["template" (token-TEMPLATE)]
+   ["typename" (token-TYPENAME)]
    ["ifdef"  (token-IFDEF)]
    ["ifndef" (token-IFNDEF)]
    ["elif"   (token-ELIF)]
@@ -64,6 +68,8 @@
    ["algorithm" (token-ALGORITHM)]
    ["main" (token-MAIN)]
    [#\" (token-QUOTE)]
+   [getter-name (token-GETTER-NAME lexeme)]
+   [setter-name (token-SETTER-NAME lexeme)]
    [header (token-HEADER lexeme)]
    [identifier (token-IDENTIFIER lexeme)]
    [literal (token-LITERAL lexeme)]
