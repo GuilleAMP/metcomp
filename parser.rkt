@@ -23,35 +23,10 @@
     [sentencias
      [() '()] ; caso base
      [(sentencia sentencias) (cons $1 $2)]]
-       ;; CLASS DEFINITION
-   [class-definition
-    [(CLASS IDENTIFIER class-block) (list 'class-definition $2 $3)]]
-   
-   ;; STRUCT MEMBER
-   [struct-member
-    [(DATA-TYPE IDENTIFIER TERMINATOR)
-     (list 'struct-member-declare $1 $2)]
-    [(DATA-TYPE IDENTIFIER ASSIGN expression TERMINATOR)
-     (list 'struct-member-assign $1 $2 $4)]]
-
-   ;; STRUCT BODY
-   [struct-body
-    [(struct-member) (list $1)]
-    [(struct-member struct-body) (cons $1 $2)]]
-
-   ;; STRUCT
-   [struct
-    [(STRUCT IDENTIFIER BRACE-OPEN struct-body BRACE-CLOSE TERMINATOR)
-     (list 'struct $2 $4)]]
-
 
     ;; Sentencias posibles
     [sentencia
-     ;; -------------------------------------- 1. MAIN FUNCTION ----------------------------------------------------------------
-     [main-function
-      [(DATA-TYPE MAIN LPAREN RPAREN block)
-       (list 'main-function $1 $5)]]
-     ;; -------------------------------------- 2. FUNCTION  ----------------------------------------------------
+     ;; ------------------------------------  2. FUNCTION  ----------------------------------------------------
      [(function)
       (list $1)]
      ;; -------------------------------------- 3. STRUCT --------------------------------------------------------
@@ -60,13 +35,10 @@
       ;; ------------------------------------- 4. PRE COMPILER SYSTEM INCLUDE --------------------------------------------------------
      [(pre-compiler-system-include)
       (list $1)]
-     ;; -------------------------------------- 5. Pre-Compiler-Directive --------------------------------------------------------
-     [(pre-compiler-directive)
-      (list $1)]
       ;; ------------------------------------  6. PRE COMPILER LOCAL INCLUDE  ----------------------------------------------------
      [(pre-compiler-local-include)
       (list $1)]
-          ;; --------------------------------  7.USING DIRECTIVE  ----------------------------------------------------
+          ;; ------------------------------------  7.USING DIRECTIVE  ----------------------------------------------------
      [(using-directive)
       (list $1)]
      ;; ------------------------------------  8. INPUT OUTPUT  ----------------------------------------------------
@@ -85,7 +57,7 @@
      ;;  --------------------------------- 12. STATEMENT -------------------------------------------------
      ;;[(statement)
       ;;(list $1)]
-         ;;  ----------------------------- 13. RETURN STATEMENT -------------------------------------------------
+         ;;  --------------------------------- 13. RETURN STATEMENT -------------------------------------------------
      [(return-statement)
       (list $1)]
      ;;  --------------------------------- 14. IF STATEMENT -------------------------------------------------
@@ -106,12 +78,6 @@
     ;;
      
     ;; Expresiones básicas y binarias
-    ;; FUNCTION
-    [function
-     [(DATA-TYPE IDENTIFIER LPAREN parameter-list RPAREN block)
-      (list 'function $2 $4 $6)]
-     [(DATA-TYPE IDENTIFIER LPAREN RPAREN block)
-      (list 'function $2 '() $5)]]
     ;; EXPRESSION
     [expression
      [(LITERAL) $1]
@@ -147,7 +113,7 @@
     ;; ARGUMENT LIST
     [argument-list
      [(expression) (list $1)]
-     [(expression COMMA argument-list) (cons $1 $3)]]
+     [(expression COMMA expression) (cons $1 $3)]]
     ;; FUNCTION CALL
     [function-call
      [(IDENTIFIER LPAREN RPAREN) (list $1)]
@@ -185,7 +151,8 @@
      [(function-call) $1]
      [(return-statement) $1]
      [(if-statement) $1]
-     [(input-output) $1]]
+     [(input-output) $1]
+     [(loop-structure) $1]]
     ;; BLOCK
     [block
      [(BRACE-OPEN statement-list BRACE-CLOSE)
@@ -275,33 +242,44 @@
     ;; CLASS DEFINITION
     [class-definition
      [(CLASS IDENTIFIER class-block) (list 'class-definition $2 $3)]]
+    ;; SYSTEM HEADER
+    [system-header-name
+     [(IOSTREAM) 'iostream]
+     [(STRING) 'string]
+     [(VECTOR) 'vector]
+     [(CMATH) 'cmath]
+     [(CSTDLIB) 'cstdlib]
+     [(CSTDIO) 'cstdio]
+     [(CSTRING) 'cstring]
+     [(CTIME) 'ctime]
+     [(ALGORITHM) 'algorithm]]
+    ;; SYSTEM HEADER
+    [system-header
+     [(LESS system-header-name MORE)
+      (list 'system-header $2)]]
+    ;; MACRO BODY
+    [macro-body
+     [(TEXT) (list $1)]
+     [(TEXT macro-body) (cons $1 $2)]]
+
+    ;; PRE-COMPILER SYSTEM INCLUDE
+    [pre-compiler-system-include
+     [(HASH INCLUDE system-header)
+      (list 'include $3)]]
+       ;; STRUCT MEMBER
+   [struct-member
+    [(DATA-TYPE IDENTIFIER TERMINATOR)
+     (list 'struct-member-declare $1 $2)]
+    [(DATA-TYPE IDENTIFIER ASSIGN expression TERMINATOR)
+     (list 'struct-member-assign $1 $2 $4)]]
+
+   ;; STRUCT BODY
+   [struct-body
+    [(struct-member) (list $1)]
+    [(struct-member struct-body) (cons $1 $2)]]
+
+   ;; STRUCT
+   [struct
+    [(STRUCT IDENTIFIER BRACE-OPEN struct-body BRACE-CLOSE TERMINATOR)
+     (list 'struct $2 $4)]]
     ]))
-    
-[system-header-name
- [(IOSTREAM) 'iostream]
- [(STRING) 'string]
- [(VECTOR) 'vector]
- [(CMATH) 'cmath]
- [(CSTDLIB) 'cstdlib]
- [(CSTDIO) 'cstdio]
- [(CSTRING) 'cstring]
- [(CTIME) 'ctime]
- [(ALGORITHM) 'algorithm]]
-
-;; SYSTEM HEADER
-[system-header
- [(LESS system-header-name MORE)
-  (list 'system-header $2)]]
-
-;; MACRO BODY
-[macro-body
- [(TEXT) (list $1)]
- [(TEXT macro-body) (cons $1 $2)]]
-
-;; PRE-COMPILER SYSTEM INCLUDE
-[pre-compiler-system-include
- [(HASH INCLUDE system-header)
-  (list 'include $3)]
- [(HASH DEFINE IDENTIFIER macro-body)
-  (list 'define $3 $4)]]
-

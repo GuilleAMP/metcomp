@@ -14,6 +14,7 @@
                              CHAR
                              HEADER
                              BOOLEAN
+                             TEXT
                              ))
 (define-empty-tokens op-tokens (ASSIGN
                                 TERMINATOR
@@ -30,15 +31,6 @@
                                 LPAREN
                                 RPAREN
                                 RETURN
-                                EQUAL
-                                NOT-EQUAL
-                                PLUS-ASSIGN
-                                MINUS-ASSIGN
-                                MUL-ASSIGN
-                                DIV-ASSIGN
-                                MOD-ASSIGN
-                                CONTINUE
-                                MAIN
                                 OR
                                 AND
                                 NOT
@@ -88,4 +80,5 @@
                                 WARNING
                                 PRAGMA
                                 LINE
+                                MAIN
                                 EOF))
