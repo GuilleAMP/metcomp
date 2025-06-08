@@ -10,9 +10,7 @@
          "float.rkt"
          "string-char.rkt"
          "boolean.rkt"
-         "header.rkt"
-         "text.rkt"
-         "identifier-capitalized.rkt")
+         "header.rkt")
 
 (provide next-token)
 
@@ -23,7 +21,6 @@
   (lexer
    [(eof) (token-EOF)]
    [whitespace (next-token input-port)]
-   ["void" (token-VOID)]
    [data-type (token-DATA-TYPE lexeme)]
    ["class" (token-CLASS)]
    ["struct" (token-STRUCT)]
@@ -46,8 +43,7 @@
    ["if" (token-IF)]
    ["(" (token-LPAREN)]
    [")" (token-RPAREN)]
-   ["template" (token-TEMPLATE)]
-   ["typename" (token-TYPENAME)]
+   [#\" (token-QUOTE)]
    ["ifdef"  (token-IFDEF)]
    ["ifndef" (token-IFNDEF)]
    ["elif"   (token-ELIF)]
@@ -57,19 +53,6 @@
    ["warning" (token-WARNING)]
    ["pragma" (token-PRAGMA)]
    ["line"   (token-LINE)]
-   ["define" (token-DEFINE)]
-   ["iostream" (token-IOSTREAM)]
-   ["vector" (token-VECTOR)]
-   ["cmath" (token-CMATH)]
-   ["cstdlib" (token-CSTDLIB)]
-   ["cstdio" (token-CSTDIO)]
-   ["cstring" (token-CSTRING)]
-   ["ctime" (token-CTIME)]
-   ["algorithm" (token-ALGORITHM)]
-   ["main" (token-MAIN)]
-   [#\" (token-QUOTE)]
-   [getter-name (token-GETTER-NAME lexeme)]
-   [setter-name (token-SETTER-NAME lexeme)]
    [header (token-HEADER lexeme)]
    [identifier (token-IDENTIFIER lexeme)]
    [literal (token-LITERAL lexeme)]
@@ -99,9 +82,26 @@
    ["hh" (token-HH)]
    ["++" (token-INCREMENTER)]
    ["--" (token-DECREMENTER)]
+   ["+=" (token-PLUS-ASSIGN)]
+   ["-=" (token-MINUS-ASSIGN)]
+   ["*=" (token-MUL-ASSIGN)]
+   ["/=" (token-DIV-ASSIGN)]
+   ["%=" (token-MOD-ASSIGN)]
    ["<" (token-LESS)]
    ["<=" (token-LESS-EQUAL)]
    [">" (token-MORE)]
    [">=" (token-MORE-EQUAL)]
+   ["==" (token-EQUAL)]
+   ["!=" (token-NOT-EQUAL)]
    ["~" (token-TILDE)]
+   ["define" (token-DEFINE)]
+   ["iostream" (token-IOSTREAM)]
+   ["vector" (token-VECTOR)]
+   ["cmath" (token-CMATH)]
+   ["cstdlib" (token-CSTDLIB)]
+   ["cstdio" (token-CSTDIO)]
+   ["cstring" (token-CSTRING)]
+   ["ctime" (token-CTIME)]
+   ["algorithm" (token-ALGORITHM)]
+   ["main" (token-MAIN)]
    [number (token-NUMBER (string->number lexeme))]))

@@ -1,18 +1,36 @@
 #lang racket
 (require parser-tools/yacc
-         "tokens.rkt")
+         "tokens.rkt"
+         "lexer.rkt")
 
 (provide parse)
 
-(define parse
+(define current-source (make-parameter ""))
+(define token-count (make-parameter 0))
+(define prev-token (make-parameter #f))
+(define current-token (make-parameter #f))
+(define next-token-cache (make-parameter #f)) ; opcional, para ver uno adelante
+
+
+
+(define raw-parser
   (parser
    [start program]
    [end EOF]
    [tokens value-tokens op-tokens]
    [error
-    (lambda (tok-name tok-val start end)
-      (error "Syntax error: unexpected token ~a at ~a-~a"
-             tok-name start end))]
+    (lambda (tok-name tok-val token)
+      (define previous (prev-token))
+      (define current (current-token))
+      (define previous-str (if previous (format "~a" previous) "Ninguno"))
+      (define current-str (format "~a" current))
+
+      (error (format "❌ Syntax error at token #~a: '~a'\n🔙 Anterior: ~a\n📍 Actual: ~a"
+                     (token-count)
+                     (or tok-val tok-name)
+                     previous-str
+                     current-str)))]
+
 
    [grammar
 
@@ -76,16 +94,24 @@
      [(destructor)
       (list $1)]
      ;;  --------------------------------- 19. GETTER -------------------------------------------------
-     [(getter)
-      (list $1)]
-         ;;  --------------------------------- 19. GETTER -------------------------------------------------
-     [(setter)
-      (list $1)]
-              ;;  --------------------------------- 19. TEMPLATE DECLARATION -------------------------------------------------
-     [(template-declaration)
-      (list $1)]
+     ;[(getter)
+     ; (list $1)]
+     ;;  --------------------------------- 20. SETTER -------------------------------------------------
+     ;[(setter)
+     ; (list $1)]
      ;;  --------------------------------- 21. CLASS HEADER -------------------------------------------------
      [(class-header)
+      (list $1)]
+          ;;  --------------------------------- 22. CLASS FUNCTION -------------------------------------------------
+     [(class-function)
+      (list $1)]
+     [(object-assignation)
+      (list $1)]
+     [(object-function-call)
+      (list $1)]
+               ;;  --------------------------------- 23. BOOLEAN FUNCTION -------------------------------------------------
+     ;;  --------------------------------- 30. TEMPLATE DECLARATION -------------------------------------------------
+     [(template-declaration)
       (list $1)]]
     
     ;;
@@ -95,11 +121,17 @@
     [expression
      [(LITERAL) $1]
      [(IDENTIFIER) $1]
-     [(expression arithmetic-operator expression) (list $2 $1 $3)]]
+     [(expression arithmetic-operator expression) (list $2 $1 $3)]
+     [(STRING) $1]
+     [(BOOLEAN) $1]
+     [(THIS-IDENTIFIER) $1]
+     [(object-function-call) $1]]
     ;; COUT CIN OPERAND
     [cout-cin-operand
      [(IDENTIFIER) $1]
-     [(STRING) $1]]
+     [(STRING) $1]
+     [(THIS-IDENTIFIER) $1]
+     [(function-call) $1]]
     ;; LOGICAL OPERATOR
     [logical-operator
      [(AND) 'and]
@@ -107,17 +139,24 @@
      [(MORE) 'more]
      [(LESS) 'less]
      [(MORE-EQUAL) 'more-equal]
-     [(LESS-EQUAL) 'less-equal]]
+     [(LESS-EQUAL) 'less-equal]
+     [(EQUAL) 'equal]
+     [(NOT-EQUAL) 'not-equal]]
     ;; ARITHMETIC OPERATOR
     [arithmetic-operator
      [(PLUS) '+]
      [(MINUS) '-]
      [(MUL) '*]
-     [(DIV) '/]]
+     [(DIV) '/]
+     [(RESIDUAL) '%]]
     ;; LOGICAL EXPRESSION
     [logical-expression
      [(IDENTIFIER logical-operator IDENTIFIER) (list $2 $1 $3)]
-     [(BOOLEAN logical-operator BOOLEAN)       (list $2 $1 $3)]]
+     [(expression logical-operator LITERAL) (list $2 $1 $3)]
+     [(IDENTIFIER logical-operator LITERAL) (list $2 $1 $3)]
+     [(BOOLEAN logical-operator BOOLEAN)       (list $2 $1 $3)]
+     [(IDENTIFIER) (list $1)]
+     [(object-function-call) (list $1)]]
     ;; RETURN EXPRESSION
     [return-expression
      [(expression) $1]
@@ -132,7 +171,10 @@
      [(IDENTIFIER LPAREN RPAREN) (list $1)]
      [(IDENTIFIER LPAREN argument-list RPAREN) (list $1 $3)]
      [(IDENTIFIER LPAREN RPAREN TERMINATOR) (list $1)]
-     [(IDENTIFIER LPAREN argument-list RPAREN TERMINATOR) (list $1 $3)]]
+     [(IDENTIFIER LPAREN argument-list RPAREN TERMINATOR) (list $1 $3)]
+     [(SETTER-NAME LPAREN argument-list RPAREN TERMINATOR) (list 'function-setter-call $1 $3)]
+     [(GETTER-NAME LPAREN RPAREN TERMINATOR) (list 'function-getter-call $1)]]
+
     ;; VARIABLE ASSIGNATION
     [variable-assignation
      [(IDENTIFIER ASSIGN expression TERMINATOR) (list 'variable-assignation $1 $3)]]
@@ -140,6 +182,8 @@
     [variable-declaration
      [(DATA-TYPE IDENTIFIER TERMINATOR)
       (list 'declare $1 $2)]
+     [(IDENTIFIER IDENTIFIER TERMINATOR)
+      (list 'declare-object $1 $2)]
      [(DATA-TYPE IDENTIFIER ASSIGN expression TERMINATOR)
       (list 'assign-declare $1 $2 $4)]]
     ;; ACCESS SPECIFIER
@@ -165,7 +209,9 @@
      [(return-statement) $1]
      [(if-statement) $1]
      [(input-output) $1]
-     [(loop-structure) $1]]
+     [(loop-structure) $1]
+     [(object-assignation) $1]
+     [(object-function-call) $1]]
     ;; BLOCK
     [block
      [(BRACE-OPEN statement-list BRACE-CLOSE)
@@ -175,7 +221,7 @@
      [(statement statement-list) (cons $1 $2)]]
     ;; ELSE BLOCK
     [else-statement
-     [(ELSE COLON block) (list 'else $3)]]
+     [(ELSE  block) (list 'else)]]
     ;; IF STATEMENT
     [if-statement
      [(IF LPAREN logical-expression RPAREN block) (list 'if $3 $5)]
@@ -232,7 +278,10 @@
      [(IDENTIFIER LPAREN parameter-list RPAREN block) (list 'constructor $1 $3 $5)]]
     ; FUNCTION
     [function
-     [(DATA-TYPE IDENTIFIER LPAREN parameter-list RPAREN block) (list 'function $2 $4 $6)]]
+     [(DATA-TYPE IDENTIFIER LPAREN parameter-list RPAREN block) (list 'function $2 $4 $6)]
+     [(DATA-TYPE IDENTIFIER LPAREN RPAREN block) (list 'function $2 $5)]
+     [(DATA-TYPE IDENTIFIER LPAREN parameter-list RPAREN TERMINATOR) (list 'function $2 $4)]
+     [(DATA-TYPE IDENTIFIER LPAREN RPAREN TERMINATOR) (list 'function-no-par $2)]]
     ;; CLASS MEMBER
     [class-member
      [(variable-declaration) $1]
@@ -253,7 +302,7 @@
      [(class-body class-body-list) (cons $1 $2)]]
     ;; CLASS BLOCL
     [class-block
-     [(BRACE-OPEN class-body-list BRACE-CLOSE) (list 'class-block $2)]]
+     [(BRACE-OPEN class-body-list BRACE-CLOSE TERMINATOR) (list 'class-block $2)]]
     ;; CLASS DEFINITION
     [class-definition
      [(class-header class-block) (list 'class-definition $1 $2)]]
@@ -271,7 +320,8 @@
     ;; SYSTEM HEADER
     [system-header
      [(LESS system-header-name MORE)
-      (list 'system-header $2)]]
+      (list 'system-header $2)]
+     [(LESS DATA-TYPE MORE) (list 'system-header $2)]]
     ;; MACRO BODY
     [macro-body
      [(TEXT) (list $1)]
@@ -304,7 +354,7 @@
 
    ;; SETTER
    [setter
-    [(VOID SETTER-NAME LPAREN parameter RPAREN block) (list 'setter $2 $4 $6)]]
+    [(DATA-TYPE SETTER-NAME LPAREN parameter RPAREN block) (list 'setter $2 $4 $6)]]
    
    ;; TEMPLATE PARAMETER
    [template-parameter
@@ -335,8 +385,53 @@
    [inheritance
     [(COLON ACCESS-SPECIFIER base-class-list) (list 'inheritance $3)]]
 
+   ;; CLASS HEADER
    [class-header
     [(CLASS IDENTIFIER inheritance) (list 'class-header $2 $3)]
     [(CLASS IDENTIFIER) (list 'class-header $2)]]
 
+   ;; CLASS FUNCTIONl
+   [class-function-name
+    [(IDENTIFIER SCOPE-RESOLUTION IDENTIFIER) (list 'class-function-name $1 $3)]]
+   [class-function
+    [(DATA-TYPE class-function-name LPAREN parameter-list RPAREN block) (list 'class-function $2 $4 $6)]
+    [(DATA-TYPE class-function-name LPAREN RPAREN block) (list 'class-function $2 $5)]]
+
+   ;; BOOLEAN EXPRESSION
+   [boolean-expression
+    [(BOOLEAN) (list 'boolean $1)]
+    [(IDENTIFIER logical-operator expression) (list 'boolean-expression $1 $3)]]
+   ;; OBJECT ASSIGNATION
+   [object-assignation
+    [(IDENTIFIER IDENTIFIER LPAREN argument-list RPAREN TERMINATOR) (list 'object-assignation $1 $2 $4)]]
+   ;; OBJECT FUNCTION CALL
+   [object-function-call
+    [(FUNCTION-OBJECT-CALL LPAREN argument-list RPAREN TERMINATOR) (list 'object-function-call $1 $3)]
+    [(FUNCTION-OBJECT-CALL LPAREN RPAREN) (list 'object-function-call $1)]
+    [(FUNCTION-OBJECT-CALL LPAREN RPAREN TERMINATOR) (list 'object-function-call $1)]]
     ]))
+
+(define (parse source)
+  (current-source source)
+  (token-count 0)
+  (prev-token #f)
+  (current-token #f)
+  (next-token-cache #f)
+
+  (define port (open-input-string source))
+
+  (define (counted-next-token)
+    ;; Guarda tokens previo y actual
+    (prev-token (current-token))
+    (define tok (next-token port))
+    (current-token tok)
+    (token-count (add1 (token-count)))
+    tok)
+
+  (raw-parser counted-next-token))
+
+(define (parse tokens)
+  (parameterize ([token-count 0]
+                 [prev-token #f]
+                 [current-token #f])
+    (raw-parser tokens)))
