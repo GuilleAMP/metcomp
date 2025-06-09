@@ -1,7 +1,7 @@
 #lang racket
 (require "lexer.rkt"
          "parser.rkt"
-         (only-in xml write-xepr)
+         (only-in xml write-xexpr)
          xml)
 
 ;; Esta función recibe un input-port y parsea usando `parse`
@@ -11,8 +11,6 @@
   (define result (run-parse tokens))
   (close-input-port input-port)
   result)
-
-
 
 ;; Lista de archivos a procesar
 (define archivos '("source10.cpp"))
@@ -51,7 +49,9 @@
       (body
         (h1 "Análisis Léxico")
         (ul ,@(map (λ (t)
-                     `(li ,(format "Tipo: ~a, Valor: ~a" (token-tipo t) (token-valor t))))
+                     (define tipo (car t))
+                     (define valor (cadr t))
+                     `(li ,(format "Tipo: ~a, Valor: ~a" tipo valor)))
                    tokens))
         (h1 "Resultado del Análisis Sintáctico")
         (p ,(format "~a" resultado-sintactico)))))

@@ -348,13 +348,15 @@
     [(STRUCT IDENTIFIER BRACE-OPEN struct-body BRACE-CLOSE TERMINATOR)
      (list 'struct $2 $4)]]
 
-   ;; GETTER
+      ;; GETTER
    [getter
-    [(DATA-TYPE GETTER-NAME LPAREN RPAREN block) (list 'getter $2 $5)]]
+    [(DATA-TYPE GETTER-NAME LPAREN RPAREN block)
+     (list 'getter $2 $1 $5)]]
 
    ;; SETTER
    [setter
-    [(DATA-TYPE SETTER-NAME LPAREN parameter RPAREN block) (list 'setter $2 $4 $6)]]
+    [(DATA-TYPE SETTER-NAME LPAREN parameter RPAREN block)
+     (list 'setter $2 $1 $4 $6)]]
    
    ;; TEMPLATE PARAMETER
    [template-parameter
