@@ -7,7 +7,8 @@
 ;; Esta función recibe un input-port y parsea usando `parse`
 (define (run-parser input-port)
   (define source (port->string input-port))
-  (define result (parse source)) ; ✅ le pasa un string
+  (define tokens (analizar source))
+  (define result (run-parse tokens))
   (close-input-port input-port)
   result)
 
@@ -40,7 +41,7 @@
 (define (generar-html-desde-codigo codigo)
   (define tokens (analizar codigo)) ; del lexer
   (define resultado-sintactico (with-handlers ([exn:fail? (λ (e) (exn-message e))])
-                                 (parser tokens))) ; del parser
+                                 (run-parse tokens))) ; ✅
 
   ;; HTML básico en formato xexpr
   (define html-xexpr

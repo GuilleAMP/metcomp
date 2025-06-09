@@ -430,8 +430,10 @@
 
   (raw-parser counted-next-token))
 
-(define (parse tokens)
-  (parameterize ([token-count 0]
-                 [prev-token #f]
-                 [current-token #f])
+(define (run-parse tokens)
+  (parameterize ((token-count 0)
+                 (prev-token #f)
+                 (current-token #f))
     (raw-parser tokens)))
+
+(provide run-parse)
