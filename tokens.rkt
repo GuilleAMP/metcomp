@@ -95,6 +95,7 @@
                                 VOID
                                 TEMPLATE
                                 TYPENAME
+                                NAMESPACE
                                 EQUAL
                                 NOT-EQUAL
                                 STRING-NAME

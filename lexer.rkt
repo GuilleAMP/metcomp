@@ -1,6 +1,6 @@
 #lang racket
 (require parser-tools/lex
-         (prefix-in : parser-tools/lex-sre)
+         parser-tools/lex-sre
          "tokens.rkt"
          "identifier.rkt"
          "digit.rkt"
@@ -14,107 +14,134 @@
          "text.rkt"
          "identifier-capitalized.rkt")
 
-(define-lex-abbrev whitespace (:or #\space #\tab #\newline #\return))
-(define-lex-abbrev number (:+ digit))
+;; Definir whitespace correctamente con re+ y re-set
+(define-lex-abbrev whitespace (re+ (re-set #\space #\tab #\newline #\return)))
+(define-lex-abbrev number (re+ digit))
+
+(define-tokens tokens
+  (SYSTEM-HEADER
+   DATA-TYPE CLASS STRUCT NAMESPACE FOR WHILE USING INCLUDE HASH
+   CIN COUT ACCESS-SPECIFIER BOOLEAN RETURN BREAK DEFAULT ELSE IF
+   LPAREN RPAREN TEMPLATE TYPENAME IFDEF IFNDEF ELIF ENDIF UNDEF ERROR
+   WARNING PRAGMA LINE DEFINE IOSTREAM VECTOR CMATH CSTDLIB CSTDIO
+   CSTRING CTIME ALGORITHM QUOTE GETTER-NAME SETTER-NAME
+   FUNCTION-OBJECT-CALL STRING IDENTIFIER IDENTIFIER-CAPITALIZED THIS-IDENTIFIER
+   LITERAL HEADER INTEGER FLOAT CHAR SCOPE-RESOLUTION SHIFT-L SHIFT-R
+   PLUS RESIDUAL MINUS MUL COMMA DIV ASSIGN TERMINATOR COLON NOT EQUAL
+   NOT-EQUAL OR AND BRACE-OPEN BRACE-CLOSE DOT H HPP HH INCREMENTER
+   DECREMENTER LESS LESS-EQUAL MORE MORE-EQUAL TILDE NUMBER
+  ))
 
 (define next-token
   (lexer
-   [(eof) (token-EOF)]
+   [(eof) 'EOF]
    [whitespace (next-token input-port)]
-   [data-type (token-DATA-TYPE lexeme)]
-   ["class" (token-CLASS)]
-   ["struct" (token-STRUCT)]
-   ["for" (token-FOR)]
-   ["while" (token-WHILE)]
-   ["using" (token-USING)]
-   ["include" (token-INCLUDE)]
-   ["#" (token-HASH)]
-   ["cin" (token-CIN)]
-   ["cout" (token-COUT)]
-   ["public" (token-ACCESS-SPECIFIER 'public)]
-   ["private" (token-ACCESS-SPECIFIER 'private)]
-   ["protected" (token-ACCESS-SPECIFIER 'protected)]
-   ["true"  (token-BOOLEAN #t)]
-   ["false" (token-BOOLEAN #f)]
-   ["return" (token-RETURN)]
-   ["break" (token-BREAK)]
-   ["default" (token-DEFAULT)]
-   ["else" (token-ELSE)]
-   ["if" (token-IF)]
-   ["(" (token-LPAREN)]
-   [")" (token-RPAREN)]
-   ["template" (token-TEMPLATE)]
-   ["typename" (token-TYPENAME)]
-   ["ifdef"  (token-IFDEF)]
-   ["ifndef" (token-IFNDEF)]
-   ["elif"   (token-ELIF)]
-   ["endif"  (token-ENDIF)]
-   ["undef"  (token-UNDEF)]
-   ["error"  (token-ERROR)]
-   ["warning" (token-WARNING)]
-   ["pragma" (token-PRAGMA)]
-   ["line"   (token-LINE)]
-   ["define" (token-DEFINE)]
-   ["iostream" (token-IOSTREAM)]
-   ["vector" (token-VECTOR)]
-   ["cmath" (token-CMATH)]
-   ["cstdlib" (token-CSTDLIB)]
-   ["cstdio" (token-CSTDIO)]
-   ["cstring" (token-CSTRING)]
-   ["ctime" (token-CTIME)]
-   ["algorithm" (token-ALGORITHM)]
-   [#\" (token-QUOTE)]
-   [getter-name (token-GETTER-NAME lexeme)]
-   [setter-name (token-SETTER-NAME lexeme)]
-   [function-object-call (token-FUNCTION-OBJECT-CALL lexeme)]
-   [string (token-STRING lexeme)]
-   [identifier (token-IDENTIFIER lexeme)]
-   [identifier-capitalized (token-IDENTIFIER-CAPITALIZED lexeme)]
-   [this-identifier (token-THIS-IDENTIFIER lexeme)]
-   [literal (token-LITERAL lexeme)]
-   [header (token-HEADER lexeme)]
-   [integer (token-INTEGER (string->number lexeme))]
-   [float (token-FLOAT (string->number lexeme))]
-   [char (token-CHAR lexeme)]
-   ["::" (token-SCOPE-RESOLUTION)]
-   ["<<" (token-SHIFT-L)]
-   [">>" (token-SHIFT-R)]
-   [#\+ (token-PLUS)]
-   [#\% (token-RESIDUAL)]
-   [#\- (token-MINUS)]
-   [#\* (token-MUL)]
-   [#\, (token-COMMA)]
-   [#\/ (token-DIV)]
-   [#\= (token-ASSIGN)]
-   [#\; (token-TERMINATOR)]
-   [#\: (token-COLON)]
-   ["!" (token-NOT)]
-   ["==" (token-EQUAL)]
-   ["!=" (token-NOT-EQUAL)]
-   ["||" (token-OR)]
-   ["&&" (token-AND)]
-   ["{" (token-BRACE-OPEN)]
-   ["}" (token-BRACE-CLOSE)]
-   ["." (token-DOT)]
-   ["h" (token-H)]
-   ["hpp" (token-HPP)]
-   ["hh" (token-HH)]
-   ["++" (token-INCREMENTER)]
-   ["--" (token-DECREMENTER)]
-   ["<" (token-LESS)]
-   ["<=" (token-LESS-EQUAL)]
-   [">" (token-MORE)]
-   [">=" (token-MORE-EQUAL)]
-   ["~" (token-TILDE)]
-   [number (token-NUMBER (string->number lexeme))]))
+   [data-type (cons 'DATA-TYPE lexeme)]
+   ["class" 'CLASS]
+   ["struct" 'STRUCT]
+   ["namespace" 'NAMESPACE]
+   ["for" 'FOR]
+   ["while" 'WHILE]
+   ["using" 'USING]
+   ["include" 'INCLUDE]
+   ["#" 'HASH]
+   [(:regexp #"<[^>]+>") (cons 'SYSTEM-HEADER lexeme)]
+   ["cin" 'CIN]
+   ["cout" 'COUT]
+   ["public" (cons 'ACCESS-SPECIFIER 'public)]
+   ["private" (cons 'ACCESS-SPECIFIER 'private)]
+   ["protected" (cons 'ACCESS-SPECIFIER 'protected)]
+   ["true"  (cons 'BOOLEAN #t)]
+   ["false" (cons 'BOOLEAN #f)]
+   ["return" 'RETURN]
+   ["break" 'BREAK]
+   ["default" 'DEFAULT]
+   ["else" 'ELSE]
+   ["if" 'IF]
+   ["(" 'LPAREN]
+   [")" 'RPAREN]
+   ["template" 'TEMPLATE]
+   ["typename" 'TYPENAME]
+   ["ifdef"  'IFDEF]
+   ["ifndef" 'IFNDEF]
+   ["elif"   'ELIF]
+   ["endif"  'ENDIF]
+   ["undef"  'UNDEF]
+   ["error"  'ERROR]
+   ["warning" 'WARNING]
+   ["pragma" 'PRAGMA]
+   ["line"   'LINE]
+   ["define" 'DEFINE]
+   ["iostream" 'IOSTREAM]
+   ["vector" 'VECTOR]
+   ["cmath" 'CMATH]
+   ["cstdlib" 'CSTDLIB]
+   ["cstdio" 'CSTDIO]
+   ["cstring" 'CSTRING]
+   ["ctime" 'CTIME]
+   ["algorithm" 'ALGORITHM]
+   [#\" 'QUOTE]
+   [getter-name (cons 'GETTER-NAME lexeme)]
+   [setter-name (cons 'SETTER-NAME lexeme)]
+   [function-object-call (cons 'FUNCTION-OBJECT-CALL lexeme)]
+   [string (cons 'STRING lexeme)]
+   [identifier (cons 'IDENTIFIER lexeme)]
+   [identifier-capitalized (cons 'IDENTIFIER-CAPITALIZED lexeme)]
+   [this-identifier (cons 'THIS-IDENTIFIER lexeme)]
+   [literal (cons 'LITERAL lexeme)]
+   [header (cons 'HEADER lexeme)]
+   [integer (cons 'INTEGER (string->number lexeme))]
+   [float (cons 'FLOAT (string->number lexeme))]
+   [char (cons 'CHAR lexeme)]
+   ["::" 'SCOPE-RESOLUTION]
+   ["<<" 'SHIFT-L]
+   [">>" 'SHIFT-R]
+   [#\+ 'PLUS]
+   [#\% 'RESIDUAL]
+   [#\- 'MINUS]
+   [#\* 'MUL]
+   [#\, 'COMMA]
+   [#\/ 'DIV]
+   [#\= 'ASSIGN]
+   [#\; 'TERMINATOR]
+   [#\: 'COLON]
+   ["!" 'NOT]
+   ["==" 'EQUAL]
+   ["!=" 'NOT-EQUAL]
+   ["||" 'OR]
+   ["&&" 'AND]
+   ["{" 'BRACE-OPEN]
+   ["}" 'BRACE-CLOSE]
+   ["." 'DOT]
+   ["h" 'H]
+   ["hpp" 'HPP]
+   ["hh" 'HH]
+   ["++" 'INCREMENTER]
+   ["--" 'DECREMENTER]
+   ["<" 'LESS]
+   ["<=" 'LESS-EQUAL]
+   [">" 'MORE]
+   [">=" 'MORE-EQUAL]
+   ["~" 'TILDE]
+   [number (cons 'NUMBER (string->number lexeme))]
+  ))
 
-;; 🧠 Función que convierte código fuente en una lista de tokens
+(define (token-tipo token)
+  (if (pair? token)
+      (car token)
+      token))
+
+(define (token-valor token)
+  (if (pair? token)
+      (cdr token)
+      #f))
+
 (define (analizar source)
   (define in (open-input-string source))
   (let loop ([tokens '()])
     (define token (next-token in))
-    (if (eq? token (token-EOF))
+    (if (eq? token 'EOF)
         (reverse tokens)
         (loop (cons token tokens)))))
 
-(provide next-token analizar)
+(provide next-token analizar token-tipo token-valor)
