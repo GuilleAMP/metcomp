@@ -12,7 +12,7 @@
 
 
 ;; Lista de archivos a procesar
-(define archivos '("ejemplos.txt"))
+(define archivos '("AccessModifier.txt"))
 
 ;; Medir tiempo total
 (define global-start (current-inexact-milliseconds))

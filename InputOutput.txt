@@ -1,0 +1,3 @@
+cout << "Hola";
+cin >> abc;
+cout << abc;

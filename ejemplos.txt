@@ -1,0 +1,4 @@
+struct Persona {
+    int edad;
+    string nombre;
+};
