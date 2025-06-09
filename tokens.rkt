@@ -24,14 +24,9 @@
 (define-empty-tokens op-tokens (ASSIGN
                                 TERMINATOR
                                 PLUS
-                                PLUS-ASSIGN
                                 MINUS
-                                MINUS-ASSIGN
                                 MUL
-                                MUL-ASSIGN
                                 DIV
-                                DIV-ASSIGN
-                                MOD-ASSIGN
                                 COLON
                                 CIN
                                 COUT
@@ -95,7 +90,6 @@
                                 VOID
                                 TEMPLATE
                                 TYPENAME
-                                NAMESPACE
                                 EQUAL
                                 NOT-EQUAL
                                 STRING-NAME
